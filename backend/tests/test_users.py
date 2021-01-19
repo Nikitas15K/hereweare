@@ -259,12 +259,14 @@ class TestUserMe:
         assert user.email == test_user.email
         assert user.username == test_user.username
         assert user.id == test_user.id
+        
     async def test_user_cannot_access_own_data_if_not_authenticated(
         self, app: FastAPI, client: AsyncClient, test_user: UserInDB,
     ) -> None:
         res = await client.get(app.url_path_for("users:get-current-user"))
         assert res.status_code == HTTP_401_UNAUTHORIZED
     @pytest.mark.parametrize("jwt_prefix", (("",), ("value",), ("Token",), ("JWT",), ("Swearer",),))
+
     async def test_user_cannot_access_own_data_with_incorrect_jwt_prefix(
         self, app: FastAPI, client: AsyncClient, test_user: UserInDB, jwt_prefix: str,
     ) -> None:

@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import EmailStr, constr, HttpUrl, BaseModel
+from datetime import datetime, date, timedelta
 from app.models.core import DateTimeModelMixin,IDModelMixin
 
 
@@ -12,7 +13,7 @@ class ProfileBase(BaseModel):
     phone_number: Optional[constr(regex="^\d{1,3}-\d{1,3}?-\d{1,4}?$")]
     licence_number: Optional[str]
     licence_category: Optional[str]
-    licence_expire_date: Optional[int]
+    licence_expire_date: Optional[date]
     image: Optional[HttpUrl]
 
 

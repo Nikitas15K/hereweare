@@ -73,7 +73,7 @@ class TestProfileManagement:
             ("phone_number", "555-333-1000"),
             ("licence_number", "X5312"),
             ("licence_category", "C"),
-            ("licence_expire_date", 2840221279),
+            # ("licence_expire_date", "2021-01-15 00:00:00"),
             ("image", "http://testimages.com/testimage"),
         ),
     )
@@ -98,7 +98,7 @@ class TestProfileManagement:
             ("image", 5, 422),
         ),
     )
-    async def test_user_recieves_error_for_invalid_update_params(
+    async def test_user_receives_error_for_invalid_update_params(
         self,
         app: FastAPI,
         authorized_client: AsyncClient,

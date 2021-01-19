@@ -29,7 +29,7 @@ async def register_new_user(
 ) -> UserPublic:
     created_user = await user_repo.register_new_user(new_user=new_user)
 
-    access_token = AccessToken(
+    created_user.access_token = AccessToken(
         access_token=auth_service.create_access_token_for_user(user=created_user), token_type="bearer"
     )
     return created_user
@@ -48,6 +48,7 @@ async def user_login_with_email_and_password(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = AccessToken(access_token=auth_service.create_access_token_for_user(user=user), token_type="bearer")
+   
     return access_token
 
 
