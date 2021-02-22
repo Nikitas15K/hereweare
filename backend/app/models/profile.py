@@ -10,7 +10,7 @@ class ProfileBase(BaseModel):
     """
     first_name: Optional[str]
     last_name: Optional[str]
-    phone_number: Optional[constr(regex="^\d{1,3}-\d{1,3}?-\d{1,4}?$")]
+    phone_number: Optional[constr(regex="^\d{3}-\d{3}?-\d{4}?$")]
     licence_number: Optional[str]
     licence_category: Optional[str]
     licence_expire_date: Optional[date]

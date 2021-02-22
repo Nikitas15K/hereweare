@@ -72,6 +72,7 @@ def create_users_table() -> None:
         """
     )
 
+
 def create_profiles_table() -> None:
     op.create_table(
         "profiles",

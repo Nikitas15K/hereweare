@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import EmailStr
 
@@ -32,6 +32,8 @@ REGISTER_NEW_USER_QUERY = """
     VALUES (:username, :email, :password, :salt)
     RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
 """
+
+
 
 
 class UsersRepository(BaseRepository):
@@ -102,3 +104,5 @@ class UsersRepository(BaseRepository):
             # fetch the user's profile from the profiles_repo
             profile=await self.profiles_repo.get_profile_by_user_id(user_id=user.id),
         )
+
+

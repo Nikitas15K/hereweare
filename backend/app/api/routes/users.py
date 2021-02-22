@@ -1,4 +1,5 @@
 from fastapi import Depends, APIRouter, HTTPException, Path, Body
+from typing import List
 
 from starlette.status import (
     HTTP_200_OK,
@@ -55,3 +56,5 @@ async def user_login_with_email_and_password(
 @router.get("/me/", response_model=UserPublic, name="users:get-current-user")
 async def get_currently_authenticated_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserPublic:
     return current_user
+
+
