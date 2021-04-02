@@ -4,20 +4,21 @@ from app.api.dependencies.database import get_repository
 from app.models.user import UserCreate, UserUpdate, UserInDB, UserPublic
 from app.models.profile import ProfileUpdate, ProfilePublic
 from app.db.repositories.profiles import ProfilesRepository
+# from pydantic import EmailStr
 
 router = APIRouter()
 
 
-@router.get("/{username}/", response_model=ProfilePublic, name="profiles:get-profile-by-username")
-async def get_profile_by_username(
-    *, username: str = Path(..., min_length=3, regex="[a-zA-Z0-9_-]+$"),
-    current_user: UserInDB = Depends(get_current_active_user),
+@router.get("/{user_id}/", response_model=ProfilePublic, name="profiles:get-profile-by-id")
+async def get_profile_by_id(
+    *, user_id: int,
     profile_repo: ProfilesRepository = Depends(get_repository(ProfilesRepository)),
 ) -> ProfilePublic:
-    profile = await profile_repo.get_profile_by_username(username=username)
+    profile = await profile_repo.get_profile_by_user_id(user_id=user_id)
     if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No profile found with that username.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such profile.")
     return profile
+    
 
 
 @router.put("/me/", response_model=ProfilePublic, name="profiles:update-own-profile")

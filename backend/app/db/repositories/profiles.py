@@ -1,6 +1,7 @@
 from app.db.repositories.base import BaseRepository
 from app.models.profile import ProfileCreate, ProfileUpdate, ProfileInDB
 from app.models.user import UserInDB
+from pydantic import EmailStr
 
 CREATE_PROFILE_FOR_USER_QUERY = """
     INSERT INTO profiles (first_name, last_name, phone_number, licence_number, licence_category,
@@ -11,13 +12,17 @@ CREATE_PROFILE_FOR_USER_QUERY = """
     licence_expire_date, image, user_id, created_at, updated_at;
 """
 GET_PROFILE_BY_USER_ID_QUERY = """
-    SELECT id, first_name, last_name, phone_number, licence_number, licence_category,
-     licence_expire_date, image, user_id, created_at, updated_at
-    FROM profiles
+    SELECT p.id,
+           u.email AS email,
+           u.username AS username, first_name, last_name, phone_number, licence_number, licence_category,
+     licence_expire_date, image, user_id, p.created_at, p.updated_at
+    FROM  profiles p
+        INNER JOIN users u 
+        ON p.user_id = u.id
     WHERE user_id = :user_id;
 """
-GET_PROFILE_BY_USERNAME_QUERY = """
-    SELECT p.id,
+GET_PROFILE_BY_EMAIL_QUERY = """
+    SELECT p.id AS id,
            u.email AS email,
            u.username AS username,
            first_name,
@@ -33,14 +38,14 @@ GET_PROFILE_BY_USERNAME_QUERY = """
     FROM profiles p
         INNER JOIN users u 
         ON p.user_id = u.id
-    WHERE user_id = (SELECT id FROM users WHERE username = :username);
+    WHERE u.email = :email;
 """
 UPDATE_PROFILE_QUERY = """
     UPDATE profiles
-    SET first_name    = :first_name,
-        last_name   = :last_name,
+    SET first_name    = UPPER(:first_name),
+        last_name   = UPPER(:last_name),
         phone_number = :phone_number,
-        licence_number = :licence_number,
+        licence_number = UPPER(:licence_number),
         licence_category = :licence_category,
         licence_expire_date = :licence_expire_date,
         image        = :image
@@ -60,10 +65,10 @@ class ProfilesRepository(BaseRepository):
             return None
         return ProfileInDB(**profile_record)
 
-    async def get_profile_by_username(self, *, username: str) -> ProfileInDB:
-        profile_record = await self.db.fetch_one(query=GET_PROFILE_BY_USERNAME_QUERY, values={"username": username})
+    async def get_profile_by_email(self, *, email: EmailStr):
+        profile_record = await self.db.fetch_one(query=GET_PROFILE_BY_EMAIL_QUERY, values={"email": email})
         if profile_record:
-            return ProfileInDB(**profile_record)
+            return profile_record
 
     async def update_profile(self, *, profile_update: ProfileUpdate, requesting_user: UserInDB) -> ProfileInDB:
         profile = await self.get_profile_by_user_id(user_id=requesting_user.id)
