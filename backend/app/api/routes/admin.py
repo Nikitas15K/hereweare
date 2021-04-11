@@ -9,8 +9,9 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from app.api.dependencies.database import get_repository
-from app.models.user import UserPublic, UserUpdate
+from app.models.user import UserPublic, UserUpdate, UserInDB
 from app.db.repositories.admin import AdminRepository
+from app.db.repositories.users import UsersRepository
 from app.api.dependencies.auth import get_current_active_user
 
 
@@ -29,3 +30,14 @@ async def get_all_users(
             detail="You do not have access.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@router.put("/activate_not/", response_model=UserPublic, name="users:block-activate-user")
+async def block_activate_user(id:int,
+        current_user: UserInDB = Depends(get_current_active_user),
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+)-> UserPublic:
+    if current_user.is_superuser:
+        return await users_repo.block_unblock_user(id= id)
+    else:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="No access")

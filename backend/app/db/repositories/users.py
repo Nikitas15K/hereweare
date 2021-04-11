@@ -14,6 +14,11 @@ from app.models.profile import ProfileCreate, ProfilePublic
 
 from app.services import auth_service
 
+GET_USER_BY_ID_QUERY = """
+    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
+    FROM users
+    WHERE id = :id;
+"""
 
 GET_USER_BY_EMAIL_QUERY = """
     SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
@@ -33,7 +38,19 @@ REGISTER_NEW_USER_QUERY = """
     RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
 """
 
+BLOCK_USER_QUERY = """
+    UPDATE users
+    SET is_active = false
+    WHERE id = :id
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
+"""
 
+RE_ACTIVATE_USER_QUERY = """
+    UPDATE users
+    SET is_active = true
+    WHERE id = :id
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
+"""
 
 
 class UsersRepository(BaseRepository):
@@ -97,6 +114,17 @@ class UsersRepository(BaseRepository):
 
         return user
 
+    async def get_user_by_id(self, *, id: int, populate: bool = True) -> UserInDB:
+        user_record = await self.db.fetch_one(query=GET_USER_BY_ID_QUERY, values={"id": id})
+
+        if user_record:
+            user = UserInDB(**user_record)
+
+            if populate:
+                return await self.populate_user(user=user)
+
+            return user
+
     async def populate_user(self, *, user: UserInDB) -> UserInDB:
         return UserPublic(
             # unpack the user in db instance,
@@ -105,4 +133,13 @@ class UsersRepository(BaseRepository):
             profile=await self.profiles_repo.get_profile_by_user_id(user_id=user.id),
         )
 
+    async def block_unblock_user(self, *, id:int) ->UserInDB:
+        user_record = await self.get_user_by_id(id= id)
 
+        if not user_record:
+            return None   
+        elif not user_record.is_active:      
+            updated_user = await self.db.fetch_one(query=RE_ACTIVATE_USER_QUERY, values={"id": id })
+        else:
+            updated_user = await self.db.fetch_one(query=BLOCK_USER_QUERY, values={"id": id })
+        return UserInDB(**updated_user)
