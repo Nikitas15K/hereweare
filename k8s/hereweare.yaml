@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hereweare-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: hereweare
+  template:
+    metadata:
+      labels:
+        app: hereweare
+    spec:
+      containers:
+        - name: hereweare
+          image: hereweare:dev
+          imagePullPolicy: Never
+          command: ["uvicorn"]
+          args: ["app.api.server:app","--host","0.0.0.0","--port","80","--workers","2"]
+          ports:
+          - containerPort: 80

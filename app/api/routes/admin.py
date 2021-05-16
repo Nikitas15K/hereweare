@@ -32,7 +32,7 @@ async def get_all_users(
         )
 
 
-@router.put("/activate_not/", response_model=UserPublic, name="users:block-activate-user")
+@router.put("/activate_not/{id}", response_model=UserPublic, name="users:block-activate-user")
 async def block_activate_user(id:int,
         current_user: UserInDB = Depends(get_current_active_user),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository)),

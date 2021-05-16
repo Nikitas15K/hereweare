@@ -1,12 +1,15 @@
+export APP_IMG ?= hereweare
+export APP_TAG ?= dev
+
 install-deps:
 	pip install -r requirements.txt
 
 build-img:
-	docker build -f Dockerfile .
+	docker build -f Dockerfile -t ${APP_IMG}:${APP_TAG} .
 
 compose-up:
-	docker network create my-network
-	docker-compose up -d --build
+
+	docker-compose up -d
 
 compose-down:
 	docker-compose down -v
