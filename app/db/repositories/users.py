@@ -15,19 +15,19 @@ from app.models.profile import ProfileCreate, ProfilePublic
 from app.services import auth_service
 
 GET_USER_BY_ID_QUERY = """
-    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
+    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at
     FROM users
     WHERE id = :id;
 """
 
 GET_USER_BY_EMAIL_QUERY = """
-    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
+    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at
     FROM users
     WHERE email = :email;
 """
 
 GET_USER_BY_USERNAME_QUERY = """
-    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
+    SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at
     FROM users
     WHERE username = :username;
 """
@@ -35,21 +35,28 @@ GET_USER_BY_USERNAME_QUERY = """
 REGISTER_NEW_USER_QUERY = """
     INSERT INTO users (username, email, password, salt)
     VALUES (:username, :email, :password, :salt)
-    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at;
 """
 
 BLOCK_USER_QUERY = """
     UPDATE users
     SET is_active = false
     WHERE id = :id
-    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at;
 """
 
 RE_ACTIVATE_USER_QUERY = """
     UPDATE users
     SET is_active = true
     WHERE id = :id
-    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at;
+"""
+
+SUPERUSER_QUERY = """
+    UPDATE users
+    SET is_superuser = true
+    WHERE id = :id
+    RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, is_master, created_at, updated_at;
 """
 
 
@@ -143,3 +150,12 @@ class UsersRepository(BaseRepository):
         else:
             updated_user = await self.db.fetch_one(query=BLOCK_USER_QUERY, values={"id": id })
         return UserInDB(**updated_user)
+    
+    async def superuser(self, *, id:int) ->UserInDB:
+        user_record = await self.get_user_by_id(id= id)
+
+        if not user_record:
+            return None   
+        else:
+            superuser = await self.db.fetch_one(query=SUPERUSER_QUERY, values={"id": id })
+        return UserInDB(**superuser)

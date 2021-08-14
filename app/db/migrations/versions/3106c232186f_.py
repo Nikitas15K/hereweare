@@ -60,6 +60,7 @@ def create_users_table() -> None:
         sa.Column("password", sa.Text, nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="True"),
         sa.Column("is_superuser", sa.Boolean(), nullable=False, server_default="False"),
+        sa.Column("is_master", sa.Boolean(), nullable=False, server_default="False"),
         *timestamps(),
     )
     op.execute(
