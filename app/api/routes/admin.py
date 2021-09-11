@@ -51,3 +51,17 @@ async def superuser(id:int,
         return await users_repo.superuser(id= id)
     else:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="No access")
+
+@router.get("/search", response_model= List[dict], name="users:get-search")
+async def get_search(username:str,
+    current_user: UserPublic = Depends(get_current_active_user),
+    admin_repo: AdminRepository = Depends(get_repository(AdminRepository)),
+)  -> List[dict]:
+    if current_user.is_master == True:
+        return await admin_repo.get_search(username=username)
+    else:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="You do not have access.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
