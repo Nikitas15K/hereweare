@@ -8,7 +8,6 @@ build-img:
 	docker build -f Dockerfile -t ${APP_IMG}:${APP_TAG} .
 
 compose-up:
-	docker network create my-network
 	docker-compose up -d
 
 compose-down:

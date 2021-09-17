@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   server:
@@ -15,8 +15,6 @@ services:
       - 8000:8000
     depends_on:
       - db
-    networks:
-      - my-network
 
   db:
     image: postgres:12.1-alpine
@@ -26,8 +24,6 @@ services:
       - ./.env
     ports:
       - 5432:5432
-    networks:
-      - my-network
 
   pgadmin:
     container_name: pgadmin
@@ -40,14 +36,7 @@ services:
       - 5050:80
     depends_on:
       - db
-    networks:
-      - my-network
 
 volumes:
   postgres_data:
   pgadmin_data:
-
-networks:
-  my-network:
-    driver: bridge
-    external: true
